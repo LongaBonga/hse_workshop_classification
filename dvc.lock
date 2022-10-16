@@ -43,8 +43,8 @@ stages:
       size: 237
       nfiles: 1
     - path: models/catboost
-      md5: a72965b73fd2ea29094c11412f125ff5
-      size: 64820
+      md5: c75299fa17ad7f656a61dfa05689afb4
+      size: 743142
   eval:
     cmd: python3 src/models/evaluate.py data/interim/train.pkl data/processed/target.pkl
       models/catboost data/validation_indexes/validx.csv
@@ -62,10 +62,10 @@ stages:
       size: 237
       nfiles: 1
     - path: models/catboost
-      md5: a72965b73fd2ea29094c11412f125ff5
-      size: 64820
+      md5: c75299fa17ad7f656a61dfa05689afb4
+      size: 743142
     outs:
     - path: reports/figures
-      md5: 6c9249b9ac7c74a0aa88d3b285106a43.dir
-      size: 169
+      md5: 1f5525001421695b63c66c1ea34f1379.dir
+      size: 216
       nfiles: 2

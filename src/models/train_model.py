@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import pickle
 
 import src.config as cfg
 import click
@@ -8,7 +9,11 @@ from dotenv import find_dotenv, load_dotenv
 from sklearn.model_selection import train_test_split
 from src.utils import save_as_pickle
 
-from catboost import CatBoostClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
 
 
 @click.command()
@@ -34,21 +39,35 @@ def main(input_data_filepath, input_target_filepath, output_model_filepath, outp
 
     logger.info(f'target  {train_target.shape} n unique: {train_target.nunique()}')
 
-    standart_params = {'loss_function': 'MultiLogloss', 'eval_metric': 'HammingLoss',  'iterations': 100, 'cat_features': cfg.CAT_COLS, 'learning_rate':  0.01,
-            'depth': 6,
-            'l2_leaf_reg': 7}
+   
+    cat_pipe = Pipeline([
+        ('ohe', OneHotEncoder(handle_unknown='ignore', sparse=False))
+    ])
+    preprocess_pipe = ColumnTransformer(transformers=[
+        ('cat_cols', cat_pipe, cfg.CAT_COLS),
+        ('ohe_cols', cat_pipe, cfg.OHE_COLS)
+    ],
+    remainder = 'passthrough'
+    )
+    sklearn_model = RandomForestClassifier(
+        criterion='entropy',
+        min_samples_split=2,
+        min_samples_leaf=1,
+        max_features='auto',
 
-    model = CatBoostClassifier(**standart_params)
-    
+    )
+    model_pipe = Pipeline([
+        ('preprocess', preprocess_pipe),
+        ('model', sklearn_model)
+    ]
+    )
+
+    model  = MultiOutputClassifier(model_pipe)
 
     model.fit(train_data, train_target)
-
-
-    
-
     # fit, save model or hyperparameters tuning using somethink like RandomizedSearchCV
 
-    model.save_model(output_model_filepath)
+    pickle.dump(model, open(output_model_filepath, 'wb'))
 
     pd.DataFrame({'indexes':val_idx.values}).to_csv(output_validx_filepath)
 
