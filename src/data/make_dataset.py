@@ -20,6 +20,7 @@ def main(input_filepath, output_data_filepath, output_target_filepath=None):
     logger.info('making final data set from raw data')
 
     df = pd.read_csv(input_filepath)
+    df = df.dropna()
     df = preprocess_data(df)
     if output_target_filepath:
         df, target = extract_target(df)

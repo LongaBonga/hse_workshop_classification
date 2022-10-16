@@ -1,0 +1,71 @@
+schema: '2.0'
+stages:
+  preprocess data:
+    cmd: python3 src/data/make_dataset.py data/raw/train.csv data/processed/train.pkl
+      data/processed/target.pkl
+    deps:
+    - path: data/raw
+      md5: 0615d6fa72b8f3aa6bd7c7d2b1810415.dir
+      size: 663790
+      nfiles: 3
+    outs:
+    - path: data/processed
+      md5: bea582e1a669d2829e34abb1a60ab9de.dir
+      size: 12197
+      nfiles: 2
+  feature_generating:
+    cmd: python3 src/features/build_features.py data/processed/train.pkl data/interim/train.pkl
+    deps:
+    - path: data/processed
+      md5: bea582e1a669d2829e34abb1a60ab9de.dir
+      size: 12197
+      nfiles: 2
+    outs:
+    - path: data/interim
+      md5: a1ad817ec390751b32bca82753aa5dbf.dir
+      size: 10359
+      nfiles: 1
+  train:
+    cmd: python3 src/models/train_model.py data/interim/train.pkl data/processed/target.pkl
+      models/catboost data/validation_indexes/validx.csv
+    deps:
+    - path: data/interim
+      md5: a1ad817ec390751b32bca82753aa5dbf.dir
+      size: 10359
+      nfiles: 1
+    - path: data/processed
+      md5: bea582e1a669d2829e34abb1a60ab9de.dir
+      size: 12197
+      nfiles: 2
+    outs:
+    - path: data/validation_indexes
+      md5: 5939b61d28a5d51a9f41f30e92c2cdff.dir
+      size: 237
+      nfiles: 1
+    - path: models/catboost
+      md5: a72965b73fd2ea29094c11412f125ff5
+      size: 64820
+  eval:
+    cmd: python3 src/models/evaluate.py data/interim/train.pkl data/processed/target.pkl
+      models/catboost data/validation_indexes/validx.csv
+    deps:
+    - path: data/interim
+      md5: a1ad817ec390751b32bca82753aa5dbf.dir
+      size: 10359
+      nfiles: 1
+    - path: data/processed
+      md5: bea582e1a669d2829e34abb1a60ab9de.dir
+      size: 12197
+      nfiles: 2
+    - path: data/validation_indexes
+      md5: 5939b61d28a5d51a9f41f30e92c2cdff.dir
+      size: 237
+      nfiles: 1
+    - path: models/catboost
+      md5: a72965b73fd2ea29094c11412f125ff5
+      size: 64820
+    outs:
+    - path: reports/figures
+      md5: 6c9249b9ac7c74a0aa88d3b285106a43.dir
+      size: 169
+      nfiles: 2

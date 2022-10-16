@@ -12,8 +12,8 @@ from features import add_early_wakeup
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('output_data_filepath', type=click.Path())
 def main(input_filepath, output_data_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """ Runs data processing scripts to turn raw data from (../processed) into
+        cleaned data ready to be analyzed (saved in ../interim).
     """
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
